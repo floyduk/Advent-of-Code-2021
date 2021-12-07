@@ -65,7 +65,19 @@ for line in vent_lines:
             for i in range(line.x1, line.x2+1):
                 increment_grid_space(grid, i, line.y1)
     
-    # We don't handle diagonals in part 1
+    else:                       # Diagonal line
+        if(line.x1 <= line.x2):
+            x1, x2 = line.x1, line.x2
+            y1, y2 = line.y1, line.y2
+        else:
+            x1, x2 = line.x2, line.x1
+            y1, y2 = line.y2, line.y1
+        if(y1 <= y2):
+            yinc = 1
+        else:
+            yinc = -1
+        for i in range(0, x2-x1+1):
+            increment_grid_space(grid, x1+i, y1+(i * yinc))
 
 # Display the grid - only useful for the sample data
 #for row in grid:
