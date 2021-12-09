@@ -5,6 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run with day9 input",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day9\\input.txt"
+            ]
+        },
+        {
+            "name": "Run with day9 sample",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day9\\sample.txt"
+            ]
+        },
+        {
             "name": "Run with day8 input",
             "type": "python",
             "request": "launch",
