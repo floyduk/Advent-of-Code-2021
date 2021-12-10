@@ -6,12 +6,13 @@ local_minima = list()
 for line in fileinput.input():
     line = line.rstrip()                        # Clean up any spare characters on the end
     grid.append([int(n) for n in list(line)])   # Convert string to list of integers
-    grid_height = len(grid)
-    grid_width = len(grid[0])
 
+# Iterate the whole grid and at each point check up down left right for lower or equal heights
+grid_height = len(grid)
+grid_width = len(grid[0])
 risk_level = 0
-for y in range(0, len(grid)):
-    for x in range(0, len(grid[0])):
+for y in range(0, grid_height):
+    for x in range(0, grid_width):
         height_here = grid[y][x]
 
         # Check above

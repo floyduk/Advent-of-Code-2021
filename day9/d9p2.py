@@ -58,12 +58,12 @@ local_minima = list()
 for line in fileinput.input():
     line = line.rstrip()                        # Clean up any spare characters on the end
     grid.append([int(n) for n in list(line)])   # Convert string to list of integers
-    grid_height = len(grid)
-    grid_width = len(grid[0])
 
 # Iterate the grid looking for local minima (low points)
-for y in range(0, len(grid)):
-    for x in range(0, len(grid[0])):
+grid_height = len(grid)
+grid_width = len(grid[0])
+for y in range(0, grid_height):
+    for x in range(0, grid_width):
         height_here = grid[y][x]
 
         # Check above
@@ -96,8 +96,8 @@ for point in local_minima:
     basin_sizes.append(basin_size)
 
 # Find the 3 largest basins
-print("Biggest 3 basin sizes: ", sorted(basin_sizes)[-3:])
 biggest_3 = sorted(basin_sizes)[-3:]
+print("Biggest 3 basin sizes: ", biggest_3)
 solution = math.prod(biggest_3)
 
 print("Solution: ", solution)
