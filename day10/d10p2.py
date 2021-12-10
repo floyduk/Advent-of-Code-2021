@@ -2,15 +2,15 @@ import fileinput
 
 chunk_openers = ["(", "[", "{", "<"]
 chunk_closers = [")", "]", "}", ">"]
-chunk_values = {
-    ')': 3,
-    ']': 57,
-    '}': 1197,
-    '>': 25137
+autocomplete_values = {
+    ')': 1,
+    ']': 2,
+    '}': 3,
+    '>': 4
 }
 
 # Read the file line by line
-corrupted_line_chars = list()                   # Keep a list of corrupted chars because they're used for scoring
+autocomplete_scores = list()
 for line in fileinput.input():
     line = line.rstrip()                        # Clean up any spare characters on the end
     line = list(line)                           # Convert to array of chars for easier iteration
@@ -27,9 +27,7 @@ for line in fileinput.input():
             expected_closer = chunk_closers[chunk_openers.index(opens[-1])]
             if(c != expected_closer):
                 # Corrupted line
-                print("Corrupted line: expected ", expected_closer, " but found ", c)
                 line_state = "corrupted"
-                corrupted_line_chars.append(c)
                 break
             else:
                 # Closing a chunk
@@ -37,11 +35,22 @@ for line in fileinput.input():
 
     # If we reach here without the line being corrupted but we have remaining opens then it is incomplete
     if(line_state == "valid" and len(opens) > 0):
-        line_state = "incomplete"
-    
-# Calculate score and display solution
-score = 0
-for c in corrupted_line_chars:
-    score += chunk_values[c]
+        # Complete the line by popping the last item off the opens list until the list is empty
+        score = 0
+        while(len(opens) > 0):
+            # Figure out what character is required to close the next chunk
+            required_closer = chunk_closers[chunk_openers.index(opens[-1])]
+            line.append(required_closer)    # I don't actually *need* to do this. Nobody is checking the lines.
+            del opens[-1]
 
-print("Solution: ", score)
+            # Keep track of the score for this line
+            score = score * 5
+            score += autocomplete_values[required_closer]
+
+        # Add the total score for this line to the list of autocomplete_scores
+        autocomplete_scores.append(score)
+
+# Sort the autocomplete scores and then find the median value
+autocomplete_scores = sorted(autocomplete_scores)
+median = autocomplete_scores[int(len(autocomplete_scores)/2)]
+print(f"Solution: {median}")
