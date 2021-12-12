@@ -5,6 +5,46 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run with day12 sample1",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day12\\sample1.txt"
+            ]
+        },
+        {
+            "name": "Run with day12 sample2",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day12\\sample2.txt"
+            ]
+        },
+        {
+            "name": "Run with day12 sample3",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day12\\sample3.txt"
+            ]
+        },
+        {
+            "name": "Run with day12 input",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day12\\input.txt"
+            ]
+        },
+        {
             "name": "Run with day11 input",
             "type": "python",
             "request": "launch",
