@@ -16,6 +16,4 @@ for line in fileinput.input():
         else:
                 print("unknown command found: ", command)
 
-        pass
-
 print("x: ", x, " depth: ", depth, " solution: ", (depth*x))

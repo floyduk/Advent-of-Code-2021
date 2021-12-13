@@ -21,6 +21,4 @@ for line in fileinput.input():
 
         print ("-aim: ", aim, " x: ", x, " depth:", depth)
 
-        pass
-
 print("aim: ", aim, " x: ", x, " depth: ", depth, " solution: ", (depth*x))
