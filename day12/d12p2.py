@@ -21,6 +21,11 @@ def get_list_of_destinations(cave):
     r.extend([d[0] for d in paths if d[1] == cave])
     return(r)
 
+# Part 2 added more logic that says in any valid route 1 small cave can be visited twice. So I
+# replaced my single if statment from part 1 with this function which begins by doing much the 
+# same thing then gets into the double visit stuff. Basically this function determines whether 
+# this route is allowed to go to this destination. It looks at the data in the route to help make 
+# that decision.
 def is_valid_destination(route, destination):
     # Can never go back to the start    
     if(destination == 'start'):
@@ -62,13 +67,13 @@ routes.append(['start'])
 # Now iterate the routes looking for more destinations until each route either reaches the end or 
 # dies (because it tries to go back to a small cave)
 for r in routes:
-    #print(f"\nHandling route: {r}")
     # Get a list of possible destinations from here
     destinations = get_list_of_destinations(r[-1])
 
     # Iterate the possible destinations and maybe make new routes for each one
     for d in destinations:
-        # Valid path if destination is a big cave or a small cave we've not visited
+        # Valid path if is_valid_destination says so. 
+        # Part 2 added more logic here so I made it a function. Check function comments for explanation.
         if(is_valid_destination(r, d)):
             # Create a new path containing everything in this path r plus the valid destination
             route_to_add = r.copy()         # Note we FORCE Python to make a fresh copy of this list
@@ -81,6 +86,5 @@ for r in routes:
                 # Add this new route to the end of the routes list
                 routes.append(route_to_add)
 
-            #print(f"Added route {route_to_add}")
-
+# All done.
 print(f"Successful routes {len(successful_routes)}")

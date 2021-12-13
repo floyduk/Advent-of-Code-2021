@@ -33,7 +33,6 @@ routes.append(['start'])
 # Now iterate the routes looking for more destinations until each route either reaches the end or 
 # dies (because it tries to go back to a small cave)
 for r in routes:
-    #print(f"\nHandling route: {r}")
     # Get a list of possible destinations from here
     destinations = get_list_of_destinations(r[-1])
 
@@ -51,7 +50,5 @@ for r in routes:
             else:
                 # Add this new route to the end of the routes list
                 routes.append(route_to_add)
-
-            #print(f"Added route {route_to_add}")
 
 print(f"Successful routes {len(successful_routes)}")
