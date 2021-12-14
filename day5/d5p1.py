@@ -3,7 +3,7 @@ import fileinput
 
 # Let's make a special data type for storing our points that makes our code cleaner
 # NamedTuples allow us to name the items in a tuple which is a but like a struct
-class Vector(NamedTuple):
+class Ventline(NamedTuple):
     x1: int
     y1: int
     x2: int
@@ -23,7 +23,7 @@ for line in fileinput.input():
     p1, p2 = line.split(" -> ")
     x1, y1 = p1.split(",")
     x2, y2 = p2.split(",")      # It's times like these that I miss Perl
-    vent_lines.append(Vector(int(x1), int(y1), int(x2), int(y2)))
+    vent_lines.append(Ventline(int(x1), int(y1), int(x2), int(y2)))
 
 # Find the max dimensions of the grid
 # Assume min x and y is 0 - this might always be true but it pays to state your assumptions
