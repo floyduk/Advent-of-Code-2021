@@ -22,29 +22,23 @@ for line in fileinput.input():
     line = line.strip()
     p1, p2 = line.split(" -> ")
     x1, y1 = p1.split(",")
-    x2, y2 = p2.split(",")
+    x2, y2 = p2.split(",")      # It's times like these that I miss Perl
     vent_lines.append(Vector(int(x1), int(y1), int(x2), int(y2)))
 
 # Find the max dimensions of the grid
 # Assume min x and y is 0 - this might always be true but it pays to state your assumptions
 max_x, max_y = 0, 0
 for line in vent_lines:
-    if(line.x1 > max_x):
-        max_x = line.x1
-    if(line.x2 > max_x):
-        max_x = line.x2
-    if(line.y1 > max_y):
-        max_y = line.y1
-    if(line.y2 > max_y):
-        max_y = line.y2
+    max_x = max_x if line.x1 <= max_x else line.x1
+    max_x = max_x if line.x2 <= max_x else line.x2
+    max_y = max_y if line.y1 <= max_y else line.y1
+    max_y = max_y if line.y2 <= max_y else line.y2
 print("max_x", max_x, " max_y", max_y)
 
 # Create a grid of the discovered dimensions
 grid = []
 for y in range(0, max_y+1):
-    grid.append([])
-    for x in range(0, max_x+1):
-        grid[y].append(".")
+    grid.append(['.'] * (max_x+1))
 
 # Iterate the lines, marking them on the grid
 for line in vent_lines:
