@@ -70,7 +70,7 @@ class bingo_card:
 bingo_cards = list()
 
 # Read in bingo boards until we run out of input - there is no error handling here
-|for line in fileinput.input():
+for line in fileinput.input():
     line = line.rstrip()
 
     if("," in line):                        # if the line contains a comma then it's the called numbers list
