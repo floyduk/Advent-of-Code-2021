@@ -10,10 +10,14 @@ def turn_into_letter_pairs(template):
         letter_pairs[match] = letter_pairs[match] + 1 if match in letter_pairs else 1
     return(letter_pairs)
 
-# This function does most of the real work involved in d14p1. It runs along the string matching
-# and inserting chars according to the rules. It builds the result into a new_template string
-# which is passed back at the end. 
-def grow_polymer(letter_pairs, rules, letter_count):
+# This function does most of the real work involved in d14p2. We work now with letter pairs so we
+# take as input the dictionary of letter pairs where the key is the letter pair and the value is
+# the count of times that pair appears in our polymer chain. Our rules have changed since part 1
+# also. The rules dictionary's value now contain a tuple containing the two letter pairs created 
+# by adding a letter in between the starting pair. So rule NN -> C means key 'NN' creates 'NC' and 
+# 'CN'. So we iterate the pairs and for each we look up the rule that matches them. Into a new 
+# dictionary we add the created letter pairs with the same count value as the starting pair had.
+def grow_polymer(letter_pairs, rules):
     new_letter_pairs = {}
     for match in letter_pairs.keys():
         # This is how many letters we're about to insert to our polymer
@@ -29,12 +33,6 @@ def grow_polymer(letter_pairs, rules, letter_count):
             new_letter_pairs[rules[match][1]] += count
         else:
             new_letter_pairs[rules[match][1]] = count
-
-        # We just added count new letters to the polymer. Increase the letter count. 
-        # The letter we added is the second letter in the first letter pair we added.
-        # The Counter type returns 0 for items that aren't yet in the index, which means we
-        # can just create new index items with one command like this. Very tidy.
-        letter_count[rules[match][0][1]] += count
 
     return(new_letter_pairs)
 
@@ -67,23 +65,21 @@ for line in fileinput.input():
 # Turn our template into a dictionary of letter pairs with a count of how many times each pair 
 # occurs in the final polymer string
 letter_pairs = turn_into_letter_pairs(template)
-
-# Our letter pairs data doesn't tell us the count of each letters, which we need for the solution
-# so I make a separate letter_count object using the Counter type. When we run a rule we are
-# Essentially just adding a single letter. NN becomes NC and CN but we only added a single C to
-# the letter count. The count of Ns doesn't change.
-letter_count = Counter(template)
 print("Starting pairs: ", letter_pairs)
-print("Starting letter count: ", letter_count)
 
 # Grow the polymer n times
 for step in range(0, 40):
-    letter_pairs = grow_polymer(letter_pairs, rules, letter_count)
-    print(f"After step {step+1}:\n{letter_pairs}\n{letter_count}")
+    letter_pairs = grow_polymer(letter_pairs, rules)
+    print(f"After step {step+1}:\n{letter_pairs}")
 
-# I use the Counter type from collections here because it does almost exactly what I need.
-# I use it to count instances of each letter in our template and then the most_common() call
-# returns a list of chars with their counts that I can inspect to get the numbers I need.
+# Thanks to @bitsofeight on the Club Twit discord for this idea. When I wrote this I felt that 
+# there must be a way to get the letter count from the letter_pairs data and of course there is.
+# You just need the first letter of each pair AND the last letter of the starting template - because
+# the first and last letters never change and the last letter isn't the first letter of a pair.
+letter_count = Counter()
+for key in letter_pairs.keys():             # Add the first letter of each letter pair
+    letter_count[key[0]] += letter_pairs[key]
+letter_count[template[-1]] += 1             # Add the last letter of the starting template
 most_common = letter_count.most_common()[0]
 least_common = letter_count.most_common()[-1]
 print(f"{most_common}, {least_common}, difference = {most_common[1] - least_common[1]}")
