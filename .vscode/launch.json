@@ -5,6 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run with day15 sample",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day15\\sample.txt"
+            ]
+        },
+        {
+            "name": "Run with day15 input",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day15\\input.txt"
+            ]
+        },
+        {
             "name": "Run with day14 sample",
             "type": "python",
             "request": "launch",
@@ -162,6 +182,36 @@
             "console": "integratedTerminal",
             "args": [
                 "E:\\Dropbox\\Documents\\Advent of Code 2021\\day8\\sample.txt"
+            ]
+        },
+        {
+            "name": "Run with day5 input",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day5\\input.txt"
+            ]
+        },
+        {
+            "name": "Run with day5 Galia's input",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day5\\galia_input.txt"
+            ]
+        },
+        {
+            "name": "Run with day5 sample",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day5\\sample.txt"
             ]
         }
     ]

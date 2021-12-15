@@ -29,16 +29,13 @@ import fileinput
 # Otherwise, select the unvisited node that is marked with the smallest tentative distance, set 
 # it as the new current node, and go back to step 3.
 
-# A point type just to make the code cleaner
 class Point(NamedTuple):
     x: int
     y: int
 
-# Return true if this coordinate is within the grid
 def is_valid_coordinate(p):
     return(p.x >= 0 and p.x < grid_width and p.y >= 0 and p.y < grid_height)
 
-# Find the unvisited node with the lowest dist[][] value
 def node_with_shortest_dist():
     shortest_dist = 99999
 
@@ -49,18 +46,43 @@ def node_with_shortest_dist():
 
     return(shortest_dist_node)
 
-# I'll input the grid or risk values into grid
+# Init some variables
 grid = list()
+starting_grid = list()
 
 # Load in the starting grid data
 for line in fileinput.input():
     line = line.rstrip()                        # Clean up any spare characters on the end
 
     # Turn the input lines into lists of ints and add them as rows to grid
-    grid.append([int(x) for x in line])
+    starting_grid.append([int(x) for x in line])
 
+# Get the dimensions of the starting grid
+starting_grid_width = len(starting_grid[0])
+starting_grid_height = len(starting_grid)
+
+# Copy the starting grid into the full grid
+for row in starting_grid:
+    grid.append(row.copy())
+
+# Copy the starting grid 4 more times onto the end of the grid rows
+for i in range(0, 4):
+    for j in range(0, starting_grid_height):
+        newlist = [(((a+i)%9)+1) for a in starting_grid[j]]
+        grid[j].extend(newlist)
+
+# Create 4 more sets of rows in the final grid
+for i in range(0, 4):
+    for j in range(0, starting_grid_height):
+        newlist = [(((a+i)%9)+1) for a in grid[j]]
+        grid.append(newlist)
+
+# Get the dimensions of the final grid
 grid_width = len(grid[0])
 grid_height = len(grid)
+
+
+# ---------- Dijkstra starts here ----------
 
 # Array of distances from source
 dist = list()
@@ -105,7 +127,8 @@ while(len(unvisited_nodes) > 0):
     
     unvisited_nodes.remove(here)
 
-    print("Unvisited nodes: ", len(unvisited_nodes))
+    if(len(unvisited_nodes)%100 == 0):
+        print("Unvisited nodes: ", len(unvisited_nodes))
 
 # Print the distance (risk) in the destination cell. This is the shortest (least risky) path cost
-print(dist[grid_height-1][grid_width-1])
+print("Solution: ", dist[grid_height-1][grid_width-1])
