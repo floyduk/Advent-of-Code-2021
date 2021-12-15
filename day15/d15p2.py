@@ -1,4 +1,5 @@
 from typing import NamedTuple
+import heapq
 import fileinput
 
 # Dijkstra's Algoritm
@@ -29,22 +30,17 @@ import fileinput
 # Otherwise, select the unvisited node that is marked with the smallest tentative distance, set 
 # it as the new current node, and go back to step 3.
 
+# Handy little named tuple that makes code nicer to read later on
 class Point(NamedTuple):
     x: int
     y: int
 
+# Woo look at me all fancy and using lambdas. It's just a function really.
+adjacents = lambda x, y: [Point(x,y+1), Point(x+1, y), Point(x, y-1), Point(x-1, y)]
+
+# Is the given point within the bounds of our data grid?
 def is_valid_coordinate(p):
-    return(p.x >= 0 and p.x < grid_width and p.y >= 0 and p.y < grid_height)
-
-def node_with_shortest_dist():
-    shortest_dist = 99999
-
-    for n in unvisited_nodes:
-        if dist[n.y][n.x] < shortest_dist:
-            shortest_dist = dist[n.y][n.x]
-            shortest_dist_node = n
-
-    return(shortest_dist_node)
+    return(0 <= p.x < grid_width and 0 <= p.y < grid_height)
 
 # Init some variables
 grid = list()
@@ -81,22 +77,11 @@ for i in range(0, 4):
 grid_width = len(grid[0])
 grid_height = len(grid)
 
-
 # ---------- Dijkstra starts here ----------
 
-# Array of distances from source
-dist = list()
-for i in range(0, grid_height):
-    dist.append([99999] * grid_width)
-
-# Set the distance from the source to the source as 0
-dist[0][0] = 0
-
-# List of unvisited nodes
-unvisited_nodes = list()
-for y in range(0, grid_height):
-    for x in range(0, grid_width):
-        unvisited_nodes.append(Point(x, y))
+# Add the source location to the list of points that need to be searched
+search_points = []
+heapq.heappush(search_points, (0, Point(0, 0)))
 
 # Visit every node always choosing the lowest dist node and look at its adjacent nodes
 # For each one set that adjacent node's cost to this node's cost plus the cost of the 
@@ -104,31 +89,29 @@ for y in range(0, grid_height):
 # more detailed explanation. The best description I found of how this works is on page:
 # https://www.udacity.com/blog/2021/10/implementing-dijkstras-algorithm-in-python.html
 # I didn't use their code but their description was the clearest I could find. 
-print("Unvisited nodes: ", len(unvisited_nodes))
-while(len(unvisited_nodes) > 0):
-    here = node_with_shortest_dist()
+# Following a little reading around I've modified this algorithm to use heapq, which is 
+# a much better datatype for this use because search_points[0] will always be the lowest 
+# cost queue item. Seems tailor made for the Dijkstra algorithm. 
+# Also made a small change that I saw somewhere that adds the nodes to the queue as it 
+# finds them rather than added them all at the start.
+visited_nodes = set()
+while search_points:
+    cost, here = heapq.heappop(search_points)
+
+    # If we've reached the destination then stop and show the answer
+    if here == Point(grid_width -1, grid_height - 1):
+        print("Solution: ", cost)
+        exit()
+
+    # Move on if this node has already been visited
+    if here in visited_nodes: 
+        continue
+
+    # Add this point to the list of visited nodes
+    visited_nodes.add(here)
 
     # Adjacent nodes
-    pd = Point(here.x, here.y+1)
-    pr = Point(here.x+1, here.y)
-    pu = Point(here.x, here.y-1)
-    pl = Point(here.x-1, here.y)
-    for p in [pd, pr, pu, pl]:
+    for p in adjacents(here.x, here.y):
         # Move on if this adjacent node isn't valid
-        if not is_valid_coordinate(p):
-            continue
-
-        # Move on if this adjacent node has already been visited
-        if not p in unvisited_nodes:
-            continue
-
-        if dist[here.y][here.x] + grid[p.y][p.x] < dist[p.y][p.x]:
-            dist[p.y][p.x] = dist[here.y][here.x] + grid[p.y][p.x]
-    
-    unvisited_nodes.remove(here)
-
-    if(len(unvisited_nodes)%100 == 0):
-        print("Unvisited nodes: ", len(unvisited_nodes))
-
-# Print the distance (risk) in the destination cell. This is the shortest (least risky) path cost
-print("Solution: ", dist[grid_height-1][grid_width-1])
+        if is_valid_coordinate(p):
+            heapq.heappush(search_points, (cost + grid[p.y][p.x], p))
