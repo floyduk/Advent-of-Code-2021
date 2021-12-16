@@ -109,18 +109,6 @@ def decode_packet(binary_input, parse_position, max_bits_to_decode = -1):
 
     return parse_position
 
-# TESTING
-#for i in [3, 4, 5, 6]:
-#    total_of_version_numbers = 0
-#    testing_output = ""
-#    print(f"{samples[i]}\n{hex_to_binary(samples[i])}")
-
-#    decode_packet(hex_to_binary(samples[i]), 0)
-
-#    print("\n", testing_output)
-
-#    print("Solution: ", total_of_version_numbers)
-
 # Running for real
 total_of_version_numbers = 0
 testing_output = ""

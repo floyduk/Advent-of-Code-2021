@@ -59,51 +59,48 @@ def decode_packet(binary_input, parse_position, max_bits_to_decode = -1):
     # Remember where we started so that we can see how mnay bits we've decoded
     started_at = parse_position
 
+    # Get the packet version and packet type
     (parse_position, packet_version) = walk_forward(binary_input, parse_position, 3)
     (parse_position, packet_type) = walk_forward(binary_input, parse_position, 3)
-    print(f"\nPacket type: {packet_type}")
 
     # How we parse the rest depends on the packet type
     if(packet_type == 4):
         # This is a literal value
+
+        # Grab pieces of the literal value in chunks of 5 bits
         more_to_come = "1"
         literal_value = ""
         while(more_to_come == "1"):
             (parse_position, more_to_come) = walk_forward(binary_input, parse_position, 1, as_binary=True)
             (parse_position, number_fragment) = walk_forward(binary_input, parse_position, 4, as_binary=True)
-            literal_value = literal_value + number_fragment
+            literal_value = literal_value + number_fragment     # Assemble the fragments into the final binary value
 
-        literal_value = binary_to_decimal(literal_value)
-        #packet_values.append(literal_value)
-        print(f"Returned literal value {literal_value}")
-        return((parse_position, literal_value))
+        # Decode the literal value and set the computed_packet_value so that it is returned at the end of the function
+        computed_packet_value = binary_to_decimal(literal_value)
 
     else:
         # This is an operator packet
-        print("Operator packet")
+
+        # Read 1 bit indicating which kind of subpacket reads we will do
         (parse_position, length_type_id) = walk_forward(binary_input, parse_position, 1)
+
         if(length_type_id == 0):
             # The next 15 bits are the total length in bits of the sub packets
             (parse_position, subpackets_total_length) = walk_forward(binary_input, parse_position, 15)
-            print(f"subpackets_total_length {subpackets_total_length}")
 
             # Go and get the subpackets
             destination_parse_position = parse_position + subpackets_total_length
             while parse_position < destination_parse_position:
                 (parse_position, value) = decode_packet(binary_input, parse_position, subpackets_total_length)
-                packet_values.append(value)
-                print(f"1 Pushed values. Values: {packet_values}")
+                packet_values.append(value)         # Build a list of subpacket return values
         else:
             # The next 11 bits are the number of sub-packets immediately contained
             (parse_position, subpackets_count) = walk_forward(binary_input, parse_position, 11)
-            print(f"subpackets_count {subpackets_count}")
             for i in range(0, subpackets_count):
                 (parse_position, value) = decode_packet(binary_input, parse_position)
-                packet_values.append(value)
-                print(f"2 Pushed value. Values: {packet_values}")
+                packet_values.append(value)         # Build a list of subpacket return values
 
-        # Calculate the value of this packet based on the operator type
-        print(f"CALCULATION: Packet type: {packet_type}\nList of packet values: {packet_values}")
+        # Calculate the computed value of this packet based on the operator type abd the list of subpacket values
         if packet_type == 0:
             computed_packet_value = sum(packet_values)
         elif packet_type == 1:
@@ -120,23 +117,12 @@ def decode_packet(binary_input, parse_position, max_bits_to_decode = -1):
             computed_packet_value = 1 if packet_values[0] < packet_values[1] else 0
         elif packet_type == 7:
             computed_packet_value = 1 if packet_values[0] == packet_values[1] else 0
-        print(f"Computed packet value: {computed_packet_value}")
 
+    # Return the computed value of this packet
     return((parse_position, computed_packet_value))
 
-
-# TESTING
-#for i in [3, 4, 5, 6]:
-#    total_of_version_numbers = 0
-#    testing_output = ""
-#    print(f"{samples[i]}\n{hex_to_binary(samples[i])}")
-
-#    decode_packet(hex_to_binary(samples[i]), 0)
-
-#    print("\n", testing_output)
-
-#    print("Solution: ", total_of_version_numbers)
-
-# Running for real
+# Running for real - 
+# NOTE: This assumes there is always 1 single outer packet that contains all others. 
+# If there was a list of packets this would only read and evaluate the first one.
 (parse_position, value) = decode_packet(hex_to_binary(input), 0)
 print("Solution: ", value)
