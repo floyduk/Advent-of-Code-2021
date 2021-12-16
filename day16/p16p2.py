@@ -112,7 +112,7 @@ def decode_packet(binary_input, parse_position):
                 (parse_position, value) = decode_packet(binary_input, parse_position)
                 packet_values.append(value)         # Build a list of subpacket return values
 
-        # Calculate the computed value of this packet based on the operator type abd the list of subpacket values
+        # Calculate the computed value of this packet based on the operator type and the list of subpacket values
         if packet_type == 0:
             computed_packet_value = sum(packet_values)
         elif packet_type == 1:
