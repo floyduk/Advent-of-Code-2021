@@ -43,21 +43,33 @@ def hex_to_binary(hex_input):
 def binary_to_decimal(binary_input):
     return int(binary_input, 2)
 
-# Grab the next bits_wanted bits from the binary input and return them together with the new pos
-def walk_forward(binary_input, pos, bits_wanted, as_binary=False):
+# Grab the next bits_wanted bits from the binary input and return them together with the new pos.
+# For part 2 I moved the conversion of the gathered binary digits into decimal into this function. This tidied up the
+# decode_packet() function quite a bit but there is 1 case where the caller wants the binary digits and NOT the 
+# decimal value. That is when decoding a literal value packet which uses a variable number of 1+4 bit chunks and needs
+# to append them together before converting to decimal. So by default we return the decimal value but if as_binary is
+# True then return the binary digits as a string.
+def walk_forward(binary_input, parse_position, bits_wanted, as_binary=False):
     if as_binary:
-        return((pos+bits_wanted, binary_input[pos:pos+bits_wanted]))
+        return((parse_position+bits_wanted, binary_input[parse_position:parse_position+bits_wanted]))
     else:
-        return((pos+bits_wanted, binary_to_decimal(binary_input[pos:pos+bits_wanted])))
+        return((parse_position+bits_wanted, binary_to_decimal(binary_input[parse_position:parse_position+bits_wanted])))
 
-# Parse position is the point in the binary_input we've got up to
-def decode_packet(binary_input, parse_position, max_bits_to_decode = -1):
+# This function is where all the main work occurs. It decodes a single packet from the binary input starting 
+# from the character at parse_position. Because some packets can contain sub-packets it is sometimes called recursively
+# and for that reason this function passes back the finishing parse_position so that the caller can update their copy 
+# of parse_position and carry on from where the recursive call left off.
+#
+# In part 2 we actually use the data in the packets and perform calculations using them so I modified the return value
+# to include the calculated value of this packet. For a literal value packet this is easy - the returned value is just
+# the literal value. But for an operator packet we first read all sub-packets by calling this function recursively, 
+# make a list of the return values of each sub-packet called packet_values, and then perform the mathematical operation 
+# described by this packet_type using the values in the packet_values list. We then return the calculated value from 
+# that operation as this packet's value together with the most recent parse_position.
+def decode_packet(binary_input, parse_position):
     # A list of values from this packet
     packet_type = -1
     packet_values = list()
-
-    # Remember where we started so that we can see how mnay bits we've decoded
-    started_at = parse_position
 
     # Get the packet version and packet type
     (parse_position, packet_version) = walk_forward(binary_input, parse_position, 3)
@@ -91,7 +103,7 @@ def decode_packet(binary_input, parse_position, max_bits_to_decode = -1):
             # Go and get the subpackets
             destination_parse_position = parse_position + subpackets_total_length
             while parse_position < destination_parse_position:
-                (parse_position, value) = decode_packet(binary_input, parse_position, subpackets_total_length)
+                (parse_position, value) = decode_packet(binary_input, parse_position)
                 packet_values.append(value)         # Build a list of subpacket return values
         else:
             # The next 11 bits are the number of sub-packets immediately contained

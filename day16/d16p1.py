@@ -41,78 +41,69 @@ def hex_to_binary(hex_input):
 def binary_to_decimal(binary_input):
     return int(binary_input, 2)
 
-# Grab the next bits_wanted bits from the binary input and return them together with the new pos
-def walk_forward(binary_input, pos, bits_wanted):
-    return((pos+bits_wanted, (binary_input[pos:pos+bits_wanted])))
+# Grab the next bits_wanted bits from the binary input and return them together with the new parse_positon
+def walk_forward(binary_input, parse_positon, bits_wanted):
+    return((parse_positon+bits_wanted, (binary_input[parse_positon:parse_positon+bits_wanted])))
 
-# Parse position is the point in the binary_input we've got up to
-def decode_packet(binary_input, parse_position, max_bits_to_decode = -1):
-    global testing_output, total_of_version_numbers
+# This function is where all the main work occurs. This function decodes a single packet from the binary input starting 
+# from the character at parse_position. Because some packets can contain sub-packets it is sometimes called recursively
+# and for that reason this function passes back the finishing parse_position so that the caller can update their copy 
+# of parse_position and carry on from where the recursive call left off.
+# In part 1 the soltion requires adding up the packet version numbers so we use a global to keep track of that but in
+# order to find all the packets we have to completely decode the packet stream including finding all the sub-packets
+# and sub-sub-packets and so on. In essence we have to completely decode the structure of the binary_input even though,
+# for part 1, we don't do any work on the data we find in there.
+def decode_packet(binary_input, parse_position):
+    global total_of_version_numbers
 
-    # Remember where we started so that we can see how mnay bits we've decoded
-    started_at = parse_position
+    # Start by reading the packet version and packet type
+    (parse_position, packet_version) = walk_forward(binary_input, parse_position, 3)
+    (parse_position, packet_type) = walk_forward(binary_input, parse_position, 3)
+    print(f"Packet version: {binary_to_decimal(packet_version)} type: {binary_to_decimal(packet_type)}")
 
-    # Set to true when we have finished decoding a complete packet
-    packet_complete = False
+    # Add to the total of version numbers - this is the part 1 solution
+    total_of_version_numbers += binary_to_decimal(packet_version)
 
-    while not packet_complete:
-        # May need to add something here to look for all zeros from parse_position to the end
-        # to detect trailing 0s and finish parsing
+    # How we parse the rest depends on the packet type
+    if(packet_type == "100"):
+        # This is a literal value
+        more_to_come = "1"
+        literal_value = ""
+        while(more_to_come == "1"):
+            (parse_position, more_to_come) = walk_forward(binary_input, parse_position, 1)
+            (parse_position, number_fragment) = walk_forward(binary_input, parse_position, 4)
+            literal_value = literal_value + number_fragment
 
-        (parse_position, packet_version) = walk_forward(binary_input, parse_position, 3)
-        print("VVV", end='')
-        (parse_position, packet_type) = walk_forward(binary_input, parse_position, 3)
-        print("TTT", end='')
-        testing_output = testing_output + f"Packet version: {binary_to_decimal(packet_version)} type: {binary_to_decimal(packet_type)}\n"
-        total_of_version_numbers += binary_to_decimal(packet_version)
+        print(f"Literal value: {literal_value}: {binary_to_decimal(literal_value)}")
+    else:
+        # This is an operator packet
 
-        # How we parse the rest depends on the packet type
-        if(packet_type == "100"):
-            # This is a literal value
-            more_to_come = "1"
-            literal_value = ""
-            while(more_to_come == "1"):
-                (parse_position, more_to_come) = walk_forward(binary_input, parse_position, 1)
-                (parse_position, number_fragment) = walk_forward(binary_input, parse_position, 4)
-                literal_value = literal_value + number_fragment
-                print("xAAAA", end='')
+        # Read the next 1 bit which indicates which type of packet sub read we will perform
+        (parse_position, length_type_id) = walk_forward(binary_input, parse_position, 1)
 
-            testing_output = testing_output + f"Literal value: {literal_value}: {binary_to_decimal(literal_value)}\n"
-            packet_complete = True
+        if(length_type_id == "0"):
+            # The next 15 bits are the total length in bits of the sub packets
+            (parse_position, subpackets_total_length) = walk_forward(binary_input, parse_position, 15)
+            print(f"Operator packet: subpackets_total_length {binary_to_decimal(subpackets_total_length)}")
+
+            # Go and get the subpackets
+            destination_parse_position = parse_position + binary_to_decimal(subpackets_total_length)
+            while parse_position < destination_parse_position:
+                parse_position = decode_packet(binary_input, parse_position)
         else:
-            # This is an operator packet
-            testing_output = testing_output + "Operator packet\n"
-            (parse_position, length_type_id) = walk_forward(binary_input, parse_position, 1)
-            print("I", end='')
-            if(length_type_id == "0"):
-                # The next 15 bits are the total length in bits of the sub packets
-                (parse_position, subpackets_total_length) = walk_forward(binary_input, parse_position, 15)
-                print("LLLLLLLLLLLLLLL", end='')
-                testing_output = testing_output + f"subpackets_total_length {binary_to_decimal(subpackets_total_length)}\n"
-                parse_position = decode_packet(binary_input, parse_position, binary_to_decimal(subpackets_total_length))
-                packet_complete = True
-            else:
-                # The next 11 bits are the number of sub-packets immediately contained
-                (parse_position, subpackets_count) = walk_forward(binary_input, parse_position, 11)
-                print("CCCCCCCCCCC", end='')
-                testing_output = testing_output + f"subpackets_count {binary_to_decimal(subpackets_count)}\n"
-                for i in range(0, binary_to_decimal(subpackets_count)):
-                    parse_position = decode_packet(binary_input, parse_position)
-                packet_complete = True
+            # The next 11 bits are the number of sub-packets immediately contained
+            (parse_position, subpackets_count) = walk_forward(binary_input, parse_position, 11)
+            print(f"Operator packet: subpackets_count {binary_to_decimal(subpackets_count)}")
 
-    testing_output = testing_output + f"Packet reading complete\n"
+            # Go and get the subpackets
+            for i in range(0, binary_to_decimal(subpackets_count)):
+                parse_position = decode_packet(binary_input, parse_position)
 
-    # If we were given a max_bits_to_decode and we've not decoded that many yet then call again to read another packet
-    if max_bits_to_decode != -1:
-        if (parse_position - started_at) < max_bits_to_decode:
-            parse_position = decode_packet(binary_input, parse_position, max_bits_to_decode - (parse_position - started_at))
-
+    # Calls to this function take the return value as the new parse_position
     return parse_position
 
 # Running for real
 total_of_version_numbers = 0
-testing_output = ""
 decode_packet(hex_to_binary(input), 0)
-print("\n", testing_output)
 
 print("Solution: ", total_of_version_numbers)
