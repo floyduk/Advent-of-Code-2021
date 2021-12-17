@@ -1,6 +1,14 @@
 from typing import NamedTuple
 import math
+import pygame
 
+# This is not part of the day 17 part 1 solution. See the pygame stuff at the end to understand
+# why this is here.
+pygame.init()
+screen = pygame.display.set_mode([500,500])
+running = True
+
+# Create a tuple with named values to make the code more readable later
 class TargetRange(NamedTuple):
     min: int
     max: int
@@ -53,6 +61,7 @@ def trajectory_hits_target(dx, dy):
     global max_y
 
     x, y = 0, 0
+    points = list()
 
     # Stop once y is less than the target_y.max
     while not y < target_y.min:
@@ -87,3 +96,56 @@ for dx in successful_dx_values:
             successful_valocities.append((dx, dy))
 
 print(f"Solution: {max_y}")
+
+# ------------------------------
+
+# All this stuff is to prove to myself that there cannot be any massive dy value that might cause the probe 
+# to go way way up and then come down super fast at and hit the target zone. So to explain what you're seeing
+# when you run this -  the black horizontal line is y=0 and the x axis plots dy values starting with 0 on the 
+# left up to 500 on the right. The radial lines you see are the discrete points on the arc described by the 
+# movement in the y plane of the probe. If it were possible for a high value to hit the target we wouldn't 
+# see a solid line going at a 45 degree downward angle like we do at the bottom right. We would see some 
+# scattered points or a much shallower line that trends towards the green zone. But the maths of this arc are 
+# such that no discrete landing point can ever hit the green target zone. There are no lines that could trend 
+# that way.
+
+graph_done = False
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill((255, 255, 255))
+
+    if not graph_done:
+        # Draw y = 0
+        pygame.draw.line(screen, (255,0,0), (0, 250), (500, 250))
+
+        # Draw the target zone
+        pygame.draw.rect(screen, (0,255,0), (0, 250-target_y.max, 500, target_y.max - target_y.min))
+        
+        x = 0
+        for i in range(0, 500):
+            y, dy = 0, i
+            points = []
+
+
+            while not y < target_y.min:
+                y += dy
+                dy -= 1
+                points.append(y)
+
+            
+
+            # Draw a dot on the graph for each point in the list
+            print(f"Plotting x:{x} = {i}: {points[:10]} - {len(points)} points")
+            for p in points:
+                pygame.draw.circle(screen, (0,0,0), (x, 250-p), 1)
+                if i == 7:
+                    print(f"Plotting point {x}, {p}")
+
+            x += 1
+        pygame.display.flip()
+        graph_done = True
+
+pygame.quit()
