@@ -14,6 +14,12 @@ debug_additon_steps = True
 # pretty hard. So I'm going to stick with the strings for now until maybe part 2 bites me in the ass and 
 # forces me to do something else.
 
+# Later thoughts:
+# It's clear now that I've written it that this should have all been recursive. After writing the 
+# calculate_magnitude() function recursively at the end it wasn't SO hard to do. That business of finding
+# the next numbers to the left and right would have been a pig, though. So maybe my approach was simpler
+# after all. I may never know, but this works so.. whatever.
+
 # Adding snail numbers is super easy. Just a string operation
 def add_snail_numbers(left, right):
     return "[" + left + "," + right + "]"
@@ -53,7 +59,10 @@ def find_2_digit_numbers(current_snail_number):
         return((True, new_snail_number))
     else:
         return((False, current_snail_number))
-# Look for pairs nested inside 4 pairs
+
+# Look for pairs nested inside 4 pairs and then if any are found with a depth >4 explode the first deepest one. I didn't know if we'd ever
+# see nesting depths of >5 or more so I wrote this to explode the deepest first. That may not, in fact, be correct. It may not even be possible
+# to get depths >5.
 def find_deepest_nested_pair(current_snail_number):
     deepest_depth = 0
     deepest_depth_index = 0
@@ -157,6 +166,55 @@ def find_number_to_the_right(current_snail_number, index):
 
     return((right_match_index, right_match))
 
+# Recursively calculate the total magnitude of this snail number. Calls step through the current_snail_number
+# keeping the index of where they're up to. Indexes are passed in and back out and when a pair is discovered 
+# via a new "[" this function calls itself to handle the new pair. When a "]"" is found the magnitude of the
+# pair is calculated and passed back to the caller.
+def calculate_magnitude(current_snail_number, index):
+    value_str = ""
+    values_list = list()
+
+    while index < len(current_snail_number):
+        index += 1
+    
+        if current_snail_number[index] == "[":
+            # Recursively read the pair we just found. 
+            # This moves us up to the char past the ] and returns the integer value of that pair
+            (value_str, index) = calculate_magnitude(current_snail_number, index)
+
+        elif current_snail_number[index] in "0123456789":
+            value_str = value_str + current_snail_number[index]
+
+        elif current_snail_number[index] == ",":
+            # Found the end of a number so convert it to an int and save it
+            values_list.append(int(value_str))
+            value_str = ""
+
+        elif current_snail_number[index] == "]":
+            # Found the end of a number so convert it to an int and save it and break
+            values_list.append(int(value_str))
+            break
+
+        else:
+            # Something went wrong!
+            print("SOMETHING WENT WRONG")
+            exit()
+        
+    # There should be exactly 2 values in the values_list
+    if(len(values_list) != 2):
+        print("SOMETHING ELSE WENT WRONG")
+        exit()
+    
+    # Calculate and return the magnitude of this pair
+    return((str((3 * values_list[0]) + (2 * values_list[1])), index))
+
+
+
+
+# ---------------------------------------------------------------------------------------------
+# ----------------------------------------- MAIN ----------------------------------------------
+# ---------------------------------------------------------------------------------------------
+
 # Read in snail numbers one by one, adding them up and reducing them before reading the next number
 current_snail_number = ""
 for line in fileinput.input():
@@ -169,8 +227,6 @@ for line in fileinput.input():
         if debug_additon_steps:
             print(f"  {current_snail_number}\n+ {new_snail_number}")
         current_snail_number = add_snail_numbers(current_snail_number, new_snail_number)
-        if debug_additon_steps:
-            print(f"= {current_snail_number}\n")
 
 
     # Reduce the current_snail_number
@@ -185,3 +241,8 @@ for line in fileinput.input():
             # Check for splits - Find 2 digit numbers
             (reduction_actions_found, current_snail_number) = find_2_digit_numbers(current_snail_number)
 
+    if debug_additon_steps:
+        print(f"= {current_snail_number}\n")
+
+#Calculate and display the magnitude of this final snail number
+print("Solution: ", calculate_magnitude(current_snail_number, 0)[0])
