@@ -89,7 +89,7 @@ def count_lit_pixels(image):
 # ---------------------------------------------------------------------------------------------
 
 # Extra space around edge of image
-extra_image_space = 80
+extra_image_space = 10
 
 # Image Enhancement Algorithm
 iea = ""
