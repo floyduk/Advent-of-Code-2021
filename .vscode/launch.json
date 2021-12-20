@@ -5,6 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run with day20 sample",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day20\\sample.txt"
+            ]
+        },
+        {
+            "name": "Run with day20 input",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "E:\\Dropbox\\Documents\\Advent of Code 2021\\day20\\input.txt"
+            ]
+        },
+        {
             "name": "Run with day19 sample",
             "type": "python",
             "request": "launch",
